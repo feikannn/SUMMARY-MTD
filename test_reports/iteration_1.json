@@ -1,0 +1,51 @@
+{
+  "summary": "Comprehensive frontend-only testing of SA Summary (Expo React Native, Expo Router, sql.js web adapter) via web preview. Dashboard, Closing form (incl. Delay=50% calc verified), WhatsApp report (contains Dues$/Dues$ Projo, no 'gross revenue' phrase), Settings theme toggle (Terang/Gelap/Sistem), Reports, Targets, Produksi, and all Lainnya nav links are working correctly. One CRITICAL bug blocks the Import flow on the web preview: picking the old backup JSON triggers the browser file chooser (btn-pick opens it fine) but no import-preview is rendered, no toast appears, and the Dashboard remains empty. Root cause: src/services/fs.ts readFileText() uses expo-file-system (new File(uri).text()) which is not supported on web — the Promise rejects silently before parseBackup is reached (console shows 'expo-file-system is not supported on web' immediately after selecting the file). Problem statement explicitly requires import to work on the web preview, so this blocks the stated end-to-end flow (import → Agustus/September/Oktober 2026 dashboard verification). Calculation correctness, WhatsApp wording rule, Manager Emily behavior, funnel '-' on 0 denominator, and theme switching are all verified. No deprecated expo-av/barcode-scanner/background-fetch detected.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Import / Export → Pilih File JSON (btn-pick) → preview → btn-apply",
+        "issue": "After selecting the rockstar backup JSON in the file chooser on the web preview, no import-preview card appears and no error toast is shown. Console warning 'expo-file-system is not supported on web' fires at the moment of selection. readFileText() in src/services/fs.ts uses expo-file-system File(uri).text() which rejects on web, so parseBackup/previewImport are never called. The subsequent flow (btn-apply → merge → dashboard August/September/October 2026 shows non-zero figures) cannot be executed on web.",
+        "affected_testIDs": ["btn-pick", "import-preview", "btn-apply", "mode-merge"]
+      }
+    ],
+    "design_issues": [],
+    "react_native_issues": [
+      {
+        "component": "RN Web shadow* styles",
+        "issue": "Repeated console warning: '\"shadow*\" style props are deprecated. Use \"boxShadow\".' Scope: anywhere StyleSheet uses shadowColor/shadowOffset/shadowOpacity/shadowRadius. Reference: likely src/components/* (Card/Button). Low priority but should migrate to boxShadow or wrap in Platform.select to silence on web."
+      },
+      {
+        "component": "pointerEvents prop",
+        "issue": "Console warning: 'props.pointerEvents is deprecated. Use style.pointerEvents'. Reference: likely inside a modal/overlay in src/components/Modal or Select. Low priority."
+      },
+      {
+        "component": "Animated useNativeDriver fallback",
+        "issue": "Console warning about missing RCTAnimation — expected on web only, not a bug. Noted for completeness."
+      }
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "CRITICAL: Fix import on web. Update src/services/fs.ts readFileText(uri) to use a web-safe branch, e.g. `if (Platform.OS === 'web') { const res = await fetch(uri); return await res.text(); }`. The DocumentPicker on web returns a blob/data URL that fetch() can read. Alternatively use the asset's `file` field (browser File) and call `.text()` on it when present. After the fix, re-run the full import flow with /tmp/backup.json and verify import-preview counts (team=5, products=7, closings=104, etc.), then btn-apply (mode-merge) and navigate the Dashboard month picker to Agustus/September/Oktober 2026 — all three months should show non-zero Dues Gross / Achievement / per-member figures.",
+    "Nice-to-have: Also make readFileText swallow the native-only error with a user-facing toast so future failures are visible instead of silent (currently showToast('Gagal membaca file...') is coded but was not visible during the failure in testing — likely because the SnackbarProvider mount or the promise is not rejecting with a message. Add a console.error around the catch block for easier debugging).",
+    "Low: Replace deprecated 'shadow*' style props with boxShadow (or Platform.select) in shared components (Card/Button/FAB) to clean up console on web.",
+    "Low: Replace props.pointerEvents with style.pointerEvents in modal/overlay components."
+  ],
+  "critical_code_review_comments": [
+    "src/services/fs.ts readFileText does not handle web — this breaks the stated Import feature on the web preview. The file is small and only needs a Platform.OS==='web' branch using fetch(uri) or the DocumentPicker asset.file.text() path.",
+    "src/services/importer.ts applyImport is comprehensive and uses withTransactionSync — good. Roster mapping (Emily=Manager has_target=0; Cipta=ASM has_target=1; Matt/Eric/Liam=SA has_target=1) is correctly implemented.",
+    "src/services/calc.ts targetInfo.personal correctly divides academy_target by activeTeam().filter(has_target===1).length — Manager Emily (has_target=0) is excluded as required.",
+    "src/services/whatsapp.ts uses only 'Dues$' and 'Dues$ Projo' and never 'gross revenue' — verified in built preview.",
+    "Dashboard projection card label 'Berdasarkan Gross Total Revenue' is on the Dashboard screen (not the WhatsApp report). The rule in the problem statement applies to WhatsApp only, so this is acceptable, but consider renaming to 'Berdasarkan Gross Revenue' or 'Berdasarkan Total Gross' for consistency with the user's preferred wording.",
+    "pct() correctly returns null for zero denominators which renders as '-' in the UI (verified in Funnel)."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "N/A (no backend by design)", "frontend": "~90% (12/13 feature groups verified; only Import blocked on web)" },
+  "seed_data_creation": "During testing created one Dues closing (Premiere Adult Family × 1 @ Rp1.488.000, Delay) under Emily on 2026-10-04 via the UI to verify calc; this was done after clearing localStorage key 'sa_summary_db_v1' and does not need cleanup since it is per-browser.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backup JSON for import test is cached at /tmp/backup.json (also fetchable from the URL in required_credentials). To get a clean state in the web preview, run `page.evaluate(() => localStorage.removeItem('sa_summary_db_v1'))` then reload. Mobile viewport 390x844 works well. All nav-* testIDs are inside the Lainnya tab, not the bottom tab bar (which only has Dashboard, Produksi, Closing, Lainnya). After the import fix, use page.expect_file_chooser context manager + fc.set_files('/tmp/backup.json'); the chooser is triggered by btn-pick successfully.",
+  "rca_of_issue": "Import failure on web preview. Reproduction: 1) Clear localStorage key sa_summary_db_v1 and reload. 2) Lainnya → Import / Export. 3) Tap 'Pilih File JSON' (btn-pick). 4) Select the rockstar backup JSON. Expected: import-preview card appears with counts (team/products/closings/production/coed/cancellations) and btn-apply. Actual: Nothing changes; console logs 'expo-file-system is not supported on web' at the moment of selection. Root cause: src/services/fs.ts line 29-32 — readFileText instantiates expo-file-system's File class and calls .text() which is a no-op/throws on web. The caught exception in app/data.tsx:48 should trigger showToast('Gagal membaca file...') but it was not visible — likely the promise resolves to undefined (returns empty string) and parseBackup then throws SyntaxError on JSON.parse('') which is also caught silently. Mitigation: add a web-safe branch, e.g. `if (Platform.OS === 'web') return await (await fetch(uri)).text();` before the expo-file-system call, OR change DocumentPicker handling to use res.assets[0].file.text() on web."
+}

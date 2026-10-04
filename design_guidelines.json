@@ -1,0 +1,188 @@
+{
+  "app_name": "SA Summary",
+  "personality": "1 iOS-Native Clean",
+  "personality_one_liner": "A structured, highly readable, and professional sales performance command center built for clarity and speed.",
+  "color": {
+    "surface": "#F7F7F7",
+    "onSurface": "#111827",
+    "surfaceSecondary": "#FFFFFF",
+    "onSurfaceSecondary": "#1F2937",
+    "surfaceTertiary": "#F3F4F6",
+    "onSurfaceTertiary": "#374151",
+    "surfaceInverse": "#1F2937",
+    "onSurfaceInverse": "#F9FAFB",
+    "brand": "#2E5A44",
+    "brandPrimary": "#2A6E4B",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#4B906A",
+    "onBrandSecondary": "#FFFFFF",
+    "brandTertiary": "#E7F3ED",
+    "onBrandTertiary": "#2E5A44",
+    "success": "#16A34A",
+    "onSuccess": "#FFFFFF",
+    "warning": "#D97706",
+    "onWarning": "#FFFFFF",
+    "error": "#DC2626",
+    "onError": "#FFFFFF",
+    "info": "#4B5563",
+    "onInfo": "#FFFFFF",
+    "border": "#E5E7EB",
+    "borderStrong": "#D1D5DB",
+    "divider": "#F3F4F6",
+    "muted": "#6B7280",
+    "onBrand": "#FFFFFF"
+  },
+  "dark_color_palette": {
+    "surface": "#121212",
+    "onSurface": "#F9FAFB",
+    "surfaceSecondary": "#1E1E1E",
+    "onSurfaceSecondary": "#F3F4F6",
+    "surfaceTertiary": "#2D2D2D",
+    "onSurfaceTertiary": "#D1D5DB",
+    "surfaceInverse": "#F9FAFB",
+    "onSurfaceInverse": "#111827",
+    "brand": "#4B906A",
+    "brandPrimary": "#55A07B",
+    "onBrandPrimary": "#111827",
+    "brandSecondary": "#6CB892",
+    "onBrandSecondary": "#111827",
+    "brandTertiary": "#233A2F",
+    "onBrandTertiary": "#6CB892",
+    "success": "#22C55E",
+    "onSuccess": "#111827",
+    "warning": "#F59E0B",
+    "onWarning": "#111827",
+    "error": "#EF4444",
+    "onError": "#FFFFFF",
+    "info": "#9CA3AF",
+    "onInfo": "#111827",
+    "border": "#2D3748",
+    "borderStrong": "#4A5568",
+    "divider": "#2D3748",
+    "muted": "#9CA3AF",
+    "onBrand": "#111827"
+  },
+  "typography": {
+    "displayFontFamily": "Plus Jakarta Sans",
+    "textFontFamily": "Plus Jakarta Sans",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous outer padding on screens with compact clustering for related data. Avoid arbitrary spacing; use scale values strictly.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": "1",
+  "navigation": "bottom_tabs",
+  "icon_set": "Phosphor",
+  "glassmorphism": {
+    "enabled": "true",
+    "do's": [
+      "Use on sticky header backgrounds over scrolling lists.",
+      "Use on the bottom tab bar.",
+      "Use for segmented control containers holding active filters.",
+      "Apply translucent tinted base (>=70% surface opacity) beneath blur to ensure readability of foreground text."
+    ],
+    "dont's": [
+      "Never blur body text regions, standard KPI cards, or data table cells.",
+      "Do not apply glass to buttons unless they sit directly over imagery."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Dashboard",
+      "purpose": "A commanding overview of MTD targets, performance achievements, and the sales funnel.",
+      "states": {
+        "loading": "Skeleton UI representing the top KPI grid.",
+        "empty": "Should never occur as targets can be 0. If absolutely no data, prompt to 'Set initial targets'.",
+        "error": "Failed to load dashboard data. Retry CTA."
+      },
+      "layout": "Grid of KPI cards for Target vs. Achievement. Use vertical sequences for the Funnel Analytics (Leads -> Appt -> Show -> Interview -> Dues) showing conversion arrows. Use progress bars inline within the KPI cards. All cards should use `surfaceSecondary` with 1pt subtle `border`."
+    },
+    {
+      "name": "Production",
+      "purpose": "Input and view daily production metrics (Leads, Appointments, Shows, Interviews).",
+      "states": {
+        "loading": "Spinner centered in the table container.",
+        "empty": "Illustration of clipboard/growth with 'No production logged today. Add entry'.",
+        "error": "Unable to save entry. Retry button."
+      },
+      "layout": "Instead of a spreadsheet-like data table that fails on mobile, use a stacked list of 'Production Cards' for each team member. Each card displays the member's metrics in a compact 2x2 or grid layout. Include a Floating Action Button (FAB) for adding new daily entries."
+    },
+    {
+      "name": "Closing",
+      "purpose": "Log and track actual sales closings (Dues/Private) and statuses (Actual/Delay/Decom).",
+      "states": {
+        "loading": "Standard centered loader.",
+        "empty": "No closings logged. 'Log your first closing' CTA.",
+        "error": "Error loading closing data. Retry button."
+      },
+      "layout": "A list view sorted by date. Each row emphasizes the Rupiah amount and uses status pills (Success=Actual, Warning=Delay, Error=Decom). Provide a sticky bottom CTA for 'Log Closing' and a swipeable list for quick actions."
+    },
+    {
+      "name": "More (Settings & Mgmt)",
+      "purpose": "Management hub for Targets, COED, Products, Teams, Reports, and App Settings.",
+      "states": {
+        "loading": "Standard spinner.",
+        "empty": "N/A - Menu index.",
+        "error": "N/A"
+      },
+      "layout": "iOS-style grouped settings list. Use `brandTertiary` background with `brandPrimary` filled icons for each row leading to sub-screens. Include the dark mode toggle and JSON DB export/import actions here."
+    }
+  ],
+  "images": {
+    "dashboard_hero_bg": {
+      "url": "https://images.unsplash.com/photo-1619252584172-a83a949b6efd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjh8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMHdoaXRlJTIwZ2xhc3Ntb3JwaGlzbSUyMHRleHR1cmV8ZW58MHx8fHwxNzkxMDgxMDkzfDA&ixlib=rb-4.1.0&q=85",
+      "dark": "https://images.unsplash.com/photo-1710438399422-2fca27686bcd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2ODl8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRhcmslMjBnbGFzc21vcnBoaXNtJTIwdGV4dHVyZXxlbnwwfHx8fDE3OTEwODExMDF8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Abstract textured background for hero section"
+    }
+  },
+  "haptics": {
+    "events": {
+      "kpi_card_tap": "selection",
+      "submit_production_entry": "notification_success",
+      "submit_closing_entry": "notification_success",
+      "delete_record": "notification_warning",
+      "tab_change": "selection",
+      "theme_toggle": "impact_light"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Design with strict adherence to 1 iOS-Native Clean. Use generous padding, readable typography (Plus Jakarta Sans), and clear visual hierarchies.",
+    "Implement the dark_color_palette conditionally using the settings toggle as defined in the requirements. Surface and backgrounds swap correctly without affecting semantic status colors.",
+    "BANNED: Any shade of Blue, Indigo, Purple, or Violet. Use the defined Forest Green brand palette for actionable items and active states.",
+    "Data Tables on Mobile: Avoid traditional spreadsheet grids. Use Card-based 'Key/Value' pairs or accordion lists to represent data rows (Production, Closing).",
+    "Ensure all currency formats display correctly as Indonesian Rupiah (Rp).",
+    "Funnel Analytics should be visualized vertically to save horizontal space, utilizing conversion rate badges between each step.",
+    "For the daily report WhatsApp generator, implement the string building directly in the client and utilize `Clipboard` from `expo-clipboard` with a success toast + haptic."
+  ]
+}
